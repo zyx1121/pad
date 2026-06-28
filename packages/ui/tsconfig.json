@@ -1,7 +1,21 @@
 {
   "extends": "@workspace/typescript-config/base.json",
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "jsx": "preserve",
+    "lib": ["es2022", "DOM", "DOM.Iterable"],
+    "baseUrl": ".",
+    "paths": {
+      "@workspace/ui/components": ["./src/components"],
+      "@workspace/ui/components/*": ["./src/components/*"],
+      "@workspace/ui/lib/utils": ["./src/lib/utils.ts"],
+      "@workspace/ui/lib/*": ["./src/lib/*"],
+      "@workspace/ui/hooks": ["./src/hooks"],
+      "@workspace/ui/hooks/*": ["./src/hooks/*"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

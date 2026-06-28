@@ -2,6 +2,9 @@
 
 import { useState } from "react"
 import { setVisibilityAction, setSharesAction } from "@/lib/actions"
+import { Button } from "@workspace/ui/components/ui/button"
+import { Label } from "@workspace/ui/components/ui/label"
+import { Textarea } from "@workspace/ui/components/ui/textarea"
 
 interface Props {
   docId: string
@@ -41,9 +44,7 @@ export function ShareControls({ docId, visibility: initialVisibility }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <label htmlFor="visibility" className="text-sm">
-          可見度
-        </label>
+        <Label htmlFor="visibility">可見度</Label>
         <select
           id="visibility"
           value={visibility}
@@ -62,24 +63,19 @@ export function ShareControls({ docId, visibility: initialVisibility }: Props) {
 
       {visibility === "shared" && (
         <form onSubmit={handleShares} className="space-y-2">
-          <label className="text-sm" htmlFor="shares-input">
+          <Label htmlFor="shares-input">
             分享給（電子郵件，逗號或換行分隔）
-          </label>
-          <textarea
+          </Label>
+          <Textarea
             id="shares-input"
             rows={3}
             value={sharesInput}
             onChange={(e) => setSharesInput(e.target.value)}
             placeholder="user@example.com"
-            className="w-full rounded-md border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
           />
-          <button
-            type="submit"
-            disabled={pending}
-            className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
-          >
+          <Button type="submit" disabled={pending} size="sm">
             更新分享名單
-          </button>
+          </Button>
         </form>
       )}
     </div>

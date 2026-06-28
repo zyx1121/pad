@@ -2,19 +2,20 @@
 
 import { signOut } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
+import { Button } from "@workspace/ui/components/ui/button"
 
 export function SignOutButton() {
   const router = useRouter()
 
   return (
-    <button
+    <Button
+      variant="raw"
       onClick={async () => {
         await signOut()
         router.refresh()
       }}
-      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
     >
       登出
-    </button>
+    </Button>
   )
 }

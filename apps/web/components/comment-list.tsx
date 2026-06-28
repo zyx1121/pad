@@ -2,6 +2,8 @@
 
 import { resolveCommentAction } from "@/lib/actions"
 import { CheckCheck } from "lucide-react"
+import { Badge } from "@workspace/ui/components/ui/badge"
+import { Button } from "@workspace/ui/components/ui/button"
 
 type Comment = {
   id: number
@@ -19,10 +21,10 @@ const trustLabel: Record<string, string> = {
   public: "公開",
 }
 
-const trustColor: Record<string, string> = {
-  owner: "bg-primary/10 text-primary",
-  shared: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
-  public: "bg-muted text-muted-foreground",
+const trustVariant: Record<string, "default" | "secondary" | "outline"> = {
+  owner: "default",
+  shared: "outline",
+  public: "secondary",
 }
 
 interface Props {
@@ -41,15 +43,16 @@ export function CommentList({ comments, ownerMode, docId }: Props) {
         <li key={c.id} className="rounded-lg border p-4">
           <div className="mb-1 flex flex-wrap items-center gap-2">
             <span className="text-sm font-medium">{c.authorEmail}</span>
-            <span
-              className={`rounded-full px-2 py-0.5 text-xs font-medium ${trustColor[c.liveTrust] ?? ""}`}
-            >
+            <Badge variant={trustVariant[c.liveTrust] ?? "secondary"}>
               {trustLabel[c.liveTrust]}
-            </span>
+            </Badge>
             {c.reanchoredStatus === "outdated" && (
-              <span className="rounded-full bg-yellow-500/10 px-2 py-0.5 text-xs text-yellow-700 dark:text-yellow-400">
+              <Badge
+                variant="outline"
+                className="text-yellow-700 dark:text-yellow-400 border-yellow-500/40"
+              >
                 已過時
-              </span>
+              </Badge>
             )}
             <span className="ml-auto text-xs text-muted-foreground">
               {new Date(c.createdAt).toLocaleString("zh-TW")}
@@ -60,13 +63,15 @@ export function CommentList({ comments, ownerMode, docId }: Props) {
             <form action={resolveCommentAction} className="mt-2">
               <input type="hidden" name="commentId" value={c.id} />
               <input type="hidden" name="docId" value={docId} />
-              <button
+              <Button
                 type="submit"
-                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                variant="raw"
+                size="sm"
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
               >
                 <CheckCheck className="h-3 w-3" />
                 標記已解決
-              </button>
+              </Button>
             </form>
           )}
         </li>

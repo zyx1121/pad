@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation"
 import { signIn } from "@/lib/auth-client"
+import { Button } from "@workspace/ui/components/ui/button"
 
 export function LoginButton() {
   const searchParams = useSearchParams()
@@ -14,14 +15,15 @@ export function LoginButton() {
   }
 
   return (
-    <button
+    <Button
+      variant="outline"
       onClick={() =>
         signIn.social({
           provider: "google",
           callbackURL: safeNext(),
         })
       }
-      className="flex w-full items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted transition-colors"
+      className="flex w-full items-center justify-center gap-2"
     >
       <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden>
         <path
@@ -42,6 +44,6 @@ export function LoginButton() {
         />
       </svg>
       使用 Google 登入
-    </button>
+    </Button>
   )
 }
