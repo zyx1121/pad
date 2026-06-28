@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@workspace/ui/globals.css";
 
 /* Source all app components for Tailwind v4 scanning */
 @source "../components/**/*.{ts,tsx}";

@@ -1,3 +1,6 @@
+// Auth + DB read — must not be SSG
+export const dynamic = "force-dynamic"
+
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"

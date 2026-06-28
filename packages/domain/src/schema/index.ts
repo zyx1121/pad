@@ -10,6 +10,10 @@ import {
   unique,
 } from "drizzle-orm/pg-core"
 
+// Better Auth tables — co-located in the shared migration so runMigrations()
+// covers the full schema in a single pass.
+export * from "./auth.ts"
+
 // --- Enums -------------------------------------------------------------------
 
 export const docVisibilityEnum = pgEnum("doc_visibility", [
@@ -64,7 +68,9 @@ export const docShares = pgTable(
 export const docRevisions = pgTable(
   "doc_revisions",
   {
-    id: bigint("id", { mode: "number" }).generatedAlwaysAsIdentity().primaryKey(),
+    id: bigint("id", { mode: "number" })
+      .generatedAlwaysAsIdentity()
+      .primaryKey(),
     docId: text("doc_id")
       .notNull()
       .references(() => docs.id, { onDelete: "cascade" }),
@@ -83,7 +89,9 @@ export const docRevisions = pgTable(
 export const comments = pgTable(
   "comments",
   {
-    id: bigint("id", { mode: "number" }).generatedAlwaysAsIdentity().primaryKey(),
+    id: bigint("id", { mode: "number" })
+      .generatedAlwaysAsIdentity()
+      .primaryKey(),
     docId: text("doc_id")
       .notNull()
       .references(() => docs.id, { onDelete: "cascade" }),

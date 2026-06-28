@@ -1,8 +1,12 @@
+// Auth + DB read — must not be SSG
+export const dynamic = "force-dynamic"
+
 import Link from "next/link"
-import { FileText, Lock, Users, Globe } from "lucide-react"
+import { Lock, Users, Globe } from "lucide-react"
 import { getPrincipal, isOwnerEmail } from "@/lib/principal"
 import { listDocsFor } from "@workspace/domain/ops"
 import { SignOutButton } from "@/components/sign-out-button"
+import { Badge } from "@workspace/ui/components/ui/badge"
 import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 
@@ -29,11 +33,7 @@ export default async function HomePage() {
           {userEmail ? (
             <>
               <span>{userEmail}</span>
-              {ownerMode && (
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                  擁有者
-                </span>
-              )}
+              {ownerMode && <Badge>擁有者</Badge>}
               <SignOutButton />
             </>
           ) : (

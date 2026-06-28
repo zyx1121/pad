@@ -25,6 +25,7 @@
     "./authz": "./src/authz.ts",
     "./anchor": "./src/anchor.ts",
     "./schema": "./src/schema/index.ts",
+    "./schema/auth": "./src/schema/auth.ts",
     "./db": "./src/db.ts",
     "./ops": "./src/ops/index.ts",
     "./migrate": "./src/migrate.ts"
