@@ -1,0 +1,22 @@
+{
+  "name": "pad-core",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "Pad MCP server — agent surface for collaborative markdown",
+  "scripts": {
+    "start": "bun run src/server.ts",
+    "dev": "bun --watch run src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "echo 'Docker build — see Dockerfile'"
+  },
+  "dependencies": {
+    "@workspace/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "typescript": "^5.9.3"
+  }
+}

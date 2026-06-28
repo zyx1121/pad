@@ -1,0 +1,32 @@
+{
+  "name": "@workspace/domain",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Pad domain — authz, schema, and DB-backed operations",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "bun run src/migrate.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "nanoid": "^5.1.5",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.14",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^5.9.3"
+  },
+  "exports": {
+    "./authz": "./src/authz.ts",
+    "./anchor": "./src/anchor.ts",
+    "./schema": "./src/schema/index.ts",
+    "./db": "./src/db.ts",
+    "./ops": "./src/ops/index.ts",
+    "./migrate": "./src/migrate.ts"
+  }
+}
