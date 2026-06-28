@@ -10,6 +10,7 @@ import {
   canManageSharing,
   canRead,
   commentTrust,
+  isOwner,
   type DocAuthView,
   type Principal,
 } from "../authz.ts"
@@ -51,7 +52,7 @@ async function loadDocAuthView(docId: string): Promise<{
   }
 
   const view: DocAuthView = {
-    ownerId: row.ownerId,
+    ownerEmail: row.ownerEmail,
     visibility: row.visibility,
     sharedWith,
   }
@@ -70,14 +71,15 @@ export async function createDoc(
   }
 ): Promise<typeof docs.$inferSelect> {
   const db = getDb()
-  const ownerEmail = process.env["OWNER_EMAIL"] ?? ""
+  const ownerEmailEnv = (process.env["OWNER_EMAIL"] ?? "").toLowerCase()
 
-  // resolve ownerId: agent acts as owner; user is their own userId
-  let ownerId: string
+  // Owner identity is the Google email (canonical). Agent acts as the configured
+  // owner; a user owns docs under their own email. Anon cannot create.
+  let ownerEmail: string
   if (principal.kind === "agent") {
-    ownerId = ownerEmail
+    ownerEmail = ownerEmailEnv
   } else if (principal.kind === "user") {
-    ownerId = principal.userId
+    ownerEmail = principal.email.toLowerCase()
   } else {
     throw Object.assign(new Error("Forbidden: anon cannot create docs"), { code: "FORBIDDEN" })
   }
@@ -92,7 +94,7 @@ export async function createDoc(
       title: input.title,
       content: input.content ?? "",
       visibility,
-      ownerId,
+      ownerEmail,
       version: 1,
     })
     .returning()
@@ -125,22 +127,23 @@ export async function listDocsFor(
   let rows: (typeof docs.$inferSelect)[]
 
   if (principal.kind === "agent") {
-    // Agent is owner-scoped: sees everything
-    const ownerEmail = process.env["OWNER_EMAIL"] ?? ""
-    rows = await db.select().from(docs).where(eq(docs.ownerId, ownerEmail))
+    // Agent is owner-scoped: sees everything the owner owns
+    const ownerEmail = (process.env["OWNER_EMAIL"] ?? "").toLowerCase()
+    rows = await db.select().from(docs).where(eq(docs.ownerEmail, ownerEmail))
   } else if (principal.kind === "user") {
     // User sees their own docs + public docs + docs shared with their email
+    const email = principal.email.toLowerCase()
     const sharedDocIds = db
       .select({ docId: docShares.docId })
       .from(docShares)
-      .where(eq(docShares.email, principal.email.toLowerCase()))
+      .where(eq(docShares.email, email))
 
     rows = await db
       .select()
       .from(docs)
       .where(
         or(
-          eq(docs.ownerId, principal.userId),
+          eq(docs.ownerEmail, email),
           eq(docs.visibility, "public"),
           and(
             eq(docs.visibility, "shared"),
@@ -175,11 +178,8 @@ export async function updateDoc(
   const loaded = await loadDocAuthView(docId)
   if (!loaded) return { kind: "forbidden" }
 
-  // Only owner can write content (agent acts as owner)
-  const isOwner =
-    principal.kind === "agent" ||
-    (principal.kind === "user" && principal.userId === loaded.row.ownerId)
-  if (!isOwner) return { kind: "forbidden" }
+  // Only owner can write content (agent acts as owner) — single authz source
+  if (!isOwner(principal, loaded.view)) return { kind: "forbidden" }
 
   // [THREAT-T-1] Optimistic lock: update only if version matches baseVersion.
   // Uses conditional UPDATE to prevent lost-update race conditions.
@@ -236,10 +236,16 @@ export async function addComment(
   const loaded = await loadDocAuthView(docId)
   if (!loaded) return { kind: "forbidden" }
 
+  if (principal.kind === "anon") return { kind: "forbidden" } // no anon comments ever
   if (!canComment(principal, loaded.view)) return { kind: "forbidden" }
-  if (principal.kind !== "user") return { kind: "forbidden" } // agent cannot add comments
 
-  // Trust is computed LIVE, not from stored value
+  // Author identity: a user comments as themselves; the agent comments as the owner.
+  const ownerEmailEnv = (process.env["OWNER_EMAIL"] ?? "").toLowerCase()
+  const authorUserId = principal.kind === "user" ? principal.userId : "agent"
+  const authorEmail =
+    principal.kind === "user" ? principal.email.toLowerCase() : ownerEmailEnv
+
+  // Trust is computed LIVE, not from stored value (agent/owner → 'owner')
   const trust = commentTrust(principal, loaded.view)
 
   const [comment] = await db
@@ -248,8 +254,8 @@ export async function addComment(
       docId,
       parentId: parentId ?? null,
       body,
-      authorUserId: principal.userId,
-      authorEmail: principal.email.toLowerCase(),
+      authorUserId,
+      authorEmail,
       trust,
       anchorRevision: anchor?.revision ?? null,
       anchorLineStart: anchor?.lineStart ?? null,
@@ -341,11 +347,8 @@ export async function resolveComment(
   const loaded = await loadDocAuthView(c.docId)
   if (!loaded) return { kind: "forbidden" }
 
-  // Only doc owner can resolve (agent acts as owner)
-  const isOwner =
-    principal.kind === "agent" ||
-    (principal.kind === "user" && principal.userId === loaded.row.ownerId)
-  if (!isOwner) return { kind: "forbidden" }
+  // Only doc owner can resolve (agent acts as owner) — single authz source
+  if (!isOwner(principal, loaded.view)) return { kind: "forbidden" }
 
   await db
     .update(comments)

@@ -28,7 +28,7 @@ export const docs = pgTable(
     content: text("content").notNull().default(""),
     version: integer("version").notNull().default(1),
     visibility: docVisibilityEnum("visibility").notNull().default("private"),
-    ownerId: text("owner_id").notNull(),
+    ownerEmail: text("owner_email").notNull(),
     status: text("status").notNull().default("draft"),
     tags: text("tags").array().notNull().default([]),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -40,7 +40,7 @@ export const docs = pgTable(
   },
   (t) => [
     index("docs_visibility_idx").on(t.visibility),
-    index("docs_owner_idx").on(t.ownerId),
+    index("docs_owner_idx").on(t.ownerEmail),
   ]
 )
 

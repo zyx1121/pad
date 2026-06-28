@@ -233,16 +233,10 @@ export const TOOLS: ToolDef[] = [
       required: ["doc_id", "body"],
     },
     handler: async (args) => {
-      // Agent cannot add comments via addComment (which requires kind:'user').
-      // The agent posts as a pseudo-user with the owner email.
-      // This is intentional — the agent's replies are surfaced as owner trust.
-      const ownerPrincipal = {
-        kind: "user" as const,
-        userId: config.ownerEmail,
-        email: config.ownerEmail,
-      }
+      assertOwnerEmail()
+      // Agent replies post as the owner — commentTrust(agent) === 'owner'.
       const result = await addComment(
-        ownerPrincipal,
+        AGENT,
         args["doc_id"] as string,
         args["body"] as string,
         undefined,

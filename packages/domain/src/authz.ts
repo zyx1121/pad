@@ -9,14 +9,17 @@ export type Principal =
   | { kind: 'anon' }                                      // unauthenticated web visitor
 
 export interface DocAuthView {
-  ownerId: string
+  ownerEmail: string // canonical owner identity = lowercased Google email
   visibility: 'private' | 'shared' | 'public'
   sharedWith: Set<string> // lowercased emails; populated only for 'shared'
 }
 
-const isOwner = (p: Principal, d: DocAuthView): boolean =>
-  p.kind === 'agent' ||                                   // the agent is YOUR agent
-  (p.kind === 'user' && p.userId === d.ownerId)
+// Owner identity is the Google email (canonical). The agent is owner-scoped; a
+// logged-in user is owner iff their email matches. NEVER compare by Better Auth
+// userId — the agent only knows the email, and ACLs (sharedWith) are email-based too.
+export const isOwner = (p: Principal, d: DocAuthView): boolean =>
+  p.kind === 'agent' ||
+  (p.kind === 'user' && p.email.toLowerCase() === d.ownerEmail)
 
 const onACL = (p: Principal, d: DocAuthView): boolean =>
   p.kind === 'user' && d.sharedWith.has(p.email.toLowerCase())
@@ -41,7 +44,8 @@ export function canComment(p: Principal, d: DocAuthView): boolean {
 // The agent (MCP) is deliberately excluded → a malicious public comment cannot
 // trick the agent into publishing or re-sharing a private doc.
 export function canManageSharing(p: Principal, d: DocAuthView): boolean {
-  return p.kind === 'user' && p.userId === d.ownerId
+  // owner-only AND human-only — agent excluded (anti-injection on publish/share)
+  return p.kind === 'user' && p.email.toLowerCase() === d.ownerEmail
 }
 
 // Provenance for the agent feed. Recompute LIVE from current ownership/ACL — never
@@ -51,7 +55,7 @@ export function commentTrust(
   p: Principal,
   d: DocAuthView,
 ): 'owner' | 'shared' | 'public' {
-  if (p.kind === 'user' && p.userId === d.ownerId) return 'owner'
+  if (isOwner(p, d)) return 'owner' // agent, or a user whose email is the owner's
   if (onACL(p, d)) return 'shared'
   return 'public'
 }
