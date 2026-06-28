@@ -20,6 +20,7 @@ coverage
 dist
 out
 build
+.next
 
 # Debug
 npm-debug.log*
