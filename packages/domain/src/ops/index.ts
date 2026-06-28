@@ -190,14 +190,32 @@ export async function updateDoc(
   }
   if (meta?.title) updates.title = meta.title
 
-  const result = await db
-    .update(docs)
-    .set(updates)
-    .where(and(eq(docs.id, docId), eq(docs.version, baseVersion)))
-    .returning()
+  const authorKind = principal.kind === "agent" ? "agent" : "owner"
+  const authorId = principal.kind === "user" ? principal.userId : "agent"
 
-  if (result.length === 0) {
-    // Either doc disappeared or version mismatch — re-check
+  // Conditional UPDATE (optimistic lock) + revision snapshot, atomic — version
+  // history can't desync from content if the snapshot insert fails.
+  const updated = await db.transaction(async (tx) => {
+    const rows = await tx
+      .update(docs)
+      .set(updates)
+      .where(and(eq(docs.id, docId), eq(docs.version, baseVersion)))
+      .returning()
+    if (rows.length === 0) return null
+    const row = rows[0]!
+    await tx.insert(docRevisions).values({
+      docId,
+      version: row.version,
+      content,
+      authorKind,
+      authorId,
+      summary: meta?.summary,
+    })
+    return row
+  })
+
+  if (!updated) {
+    // version mismatch or doc gone — re-check to distinguish
     const [current] = await db
       .select({ version: docs.version })
       .from(docs)
@@ -206,21 +224,6 @@ export async function updateDoc(
     if (!current) return { kind: "forbidden" }
     return { kind: "version_conflict", current: current.version }
   }
-
-  const updated = result[0]!
-
-  // Write revision snapshot
-  const authorKind = principal.kind === "agent" ? "agent" : "owner"
-  const authorId =
-    principal.kind === "user" ? principal.userId : "agent"
-  await db.insert(docRevisions).values({
-    docId,
-    version: updated.version,
-    content,
-    authorKind,
-    authorId,
-    summary: meta?.summary,
-  })
 
   return { kind: "ok", doc: updated }
 }
@@ -386,12 +389,15 @@ export async function setShares(
   // [THREAT-E-1] agent cannot modify ACL
   if (!canManageSharing(principal, loaded.view)) return { kind: "forbidden" }
 
-  // Replace ACL atomically
-  await db.delete(docShares).where(eq(docShares.docId, docId))
-  if (emails.length > 0) {
-    await db.insert(docShares).values(
-      emails.map((email) => ({ docId, email: email.toLowerCase() }))
-    )
-  }
+  // Replace ACL in one transaction — grantees are never momentarily locked out
+  // mid-update (delete-then-insert window).
+  await db.transaction(async (tx) => {
+    await tx.delete(docShares).where(eq(docShares.docId, docId))
+    if (emails.length > 0) {
+      await tx.insert(docShares).values(
+        emails.map((email) => ({ docId, email: email.toLowerCase() }))
+      )
+    }
+  })
   return { kind: "ok" }
 }

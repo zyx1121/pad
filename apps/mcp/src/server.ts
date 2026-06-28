@@ -7,11 +7,14 @@ import { handleMcp } from "./mcp-dispatch.ts"
 async function main() {
   console.log("[pad-core] starting...")
 
-  if (!config.mcpWriteToken) {
-    console.warn("[pad-core] WARN: MCP_WRITE_TOKEN not set — /mcp is open (dev only)")
+  // Fail CLOSED: refuse to start without a strong bearer token — /mcp is never open.
+  if (!config.mcpWriteToken || config.mcpWriteToken.length < 16) {
+    console.error("[pad-core] FATAL: MCP_WRITE_TOKEN must be set (>=16 chars)")
+    process.exit(1)
   }
   if (!config.ownerEmail) {
-    console.warn("[pad-core] WARN: OWNER_EMAIL not set — agent doc ownership will fail")
+    console.error("[pad-core] FATAL: OWNER_EMAIL must be set (agent doc ownership)")
+    process.exit(1)
   }
 
   try {
