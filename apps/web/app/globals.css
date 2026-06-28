@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Source all app components for Tailwind v4 scanning */
+@source "../components/**/*.{ts,tsx}";
+@source "../app/**/*.{ts,tsx}";
+@source "../../packages/ui/src/**/*.{ts,tsx}";
