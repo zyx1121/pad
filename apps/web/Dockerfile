@@ -27,7 +27,8 @@ COPY apps/web ./apps/web
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN cd apps/web && bun run build
+# run from root via workspace filter so bun resolves hoisted bins (next, etc.)
+RUN bun run --filter=pad-web build
 
 # --- runner stage: minimal runtime image -------------------------------------
 FROM node:22-alpine AS runner
