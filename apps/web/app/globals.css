@@ -1,7 +1,8 @@
 @import "tailwindcss";
 @import "@workspace/ui/globals.css";
 
-/* Source all app components for Tailwind v4 scanning */
+/* Source all app + workspace-ui components for Tailwind v4 scanning.
+   Paths are relative to THIS file (apps/web/app/); the ui package is three
+   levels up at the repo root, not two. */
 @source "../components/**/*.{ts,tsx}";
-@source "../app/**/*.{ts,tsx}";
-@source "../../packages/ui/src/**/*.{ts,tsx}";
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
