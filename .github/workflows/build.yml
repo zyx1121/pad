@@ -23,8 +23,6 @@ jobs:
         include:
           - app: pad-core
             dockerfile: apps/mcp/Dockerfile
-          - app: pad-web
-            dockerfile: apps/web/Dockerfile
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3

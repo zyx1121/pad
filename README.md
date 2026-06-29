@@ -1,21 +1,34 @@
-# shadcn/ui monorepo template
+# pad
 
-This is a Next.js monorepo template with shadcn/ui.
+For-agent markdown store — **MCP-first**. Agents create / read / update markdown
+docs (and threaded, anchored comments) over MCP; storage is Postgres. No human web
+UI — agents are the only consumers.
 
-## Adding components
+## Layout (turborepo + bun)
 
-To add components to your app, run the following command at the root of your `web` app:
+- `packages/domain` — `@workspace/domain`: drizzle schema, authz (single source),
+  ops, migrations
+- `apps/mcp` — **pad-core**: Bun MCP server (`/mcp`, bearer-gated, owner-scoped)
+
+## Dev
 
 ```bash
-pnpm dlx shadcn@latest add button -c apps/web
+bun install
+bun run typecheck
+# needs DATABASE_URL, MCP_WRITE_TOKEN (>=16 chars), OWNER_EMAIL
+bun run apps/mcp/src/server.ts
 ```
 
-This will place the ui components in the `packages/ui/src/components` directory.
+## MCP tools
 
-## Using components
+`doc_create` · `doc_read` · `doc_update` (optimistic lock via `base_version`) ·
+`doc_list` · `comments_list` · `comment_reply` · `comment_resolve`
 
-To use the components in your app, import them from the `ui` package.
+## Deploy
 
-```tsx
-import { Button } from "@workspace/ui/components/button";
-```
+CI builds `ghcr.io/zyx1121/pad-core` (SHA-pinned) → deployed to k3s via the
+**vivarium** GitOps repo (namespace `pad`): `pad-db` (Postgres) + `pad-core`.
+MCP endpoint: `pad-mcp.app.zyx.tw` (external, token) · `pad-mcp.internal` (in-cluster).
+
+> A human read/comment web app (`apps/web` + `packages/ui`) was removed — it lives
+> in git history if ever needed, but agents talk to pad over MCP, not a browser.
