@@ -9,6 +9,8 @@ COPY packages/ui/package.json ./packages/ui/package.json
 COPY packages/typescript-config/package.json ./packages/typescript-config/package.json
 COPY packages/eslint-config/package.json ./packages/eslint-config/package.json
 COPY apps/web/package.json ./apps/web/package.json
+# frozen-lockfile needs the FULL workspace graph, even members this image won't run
+COPY apps/mcp/package.json ./apps/mcp/package.json
 RUN bun install --frozen-lockfile
 
 # --- builder stage: Next.js build (standalone output) ------------------------
@@ -20,6 +22,7 @@ COPY package.json ./
 COPY packages/domain ./packages/domain
 COPY packages/ui ./packages/ui
 COPY packages/typescript-config ./packages/typescript-config
+COPY packages/eslint-config ./packages/eslint-config
 COPY apps/web ./apps/web
 
 ENV NEXT_TELEMETRY_DISABLED=1

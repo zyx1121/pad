@@ -9,6 +9,9 @@ COPY packages/domain/package.json ./packages/domain/package.json
 COPY packages/typescript-config/package.json ./packages/typescript-config/package.json
 COPY packages/eslint-config/package.json ./packages/eslint-config/package.json
 COPY apps/mcp/package.json ./apps/mcp/package.json
+# frozen-lockfile needs the FULL workspace graph, even members this image won't run
+COPY packages/ui/package.json ./packages/ui/package.json
+COPY apps/web/package.json ./apps/web/package.json
 RUN bun install --frozen-lockfile --production
 
 # --- runner stage: copy sources and start ------------------------------------
