@@ -19,8 +19,42 @@ export async function addCommentAction(formData: FormData) {
   if (typeof docId !== "string" || typeof body !== "string") return
   if (!body.trim()) return
 
+  // Anchor fields (optional — only present for inline/selection comments)
+  const anchorQuoteRaw = formData.get("anchorQuote")
+  const anchorRevisionRaw = formData.get("anchorRevision")
+  const anchorLineStartRaw = formData.get("anchorLineStart")
+  const anchorLineEndRaw = formData.get("anchorLineEnd")
+
+  const anchorQuote =
+    typeof anchorQuoteRaw === "string" && anchorQuoteRaw.length > 0
+      ? anchorQuoteRaw
+      : null
+  const anchorRevision =
+    typeof anchorRevisionRaw === "string" ? Number(anchorRevisionRaw) : null
+  const anchorLineStart =
+    typeof anchorLineStartRaw === "string" ? Number(anchorLineStartRaw) : null
+  const anchorLineEnd =
+    typeof anchorLineEndRaw === "string" ? Number(anchorLineEndRaw) : null
+
+  // Build anchor if we have at minimum a quote + revision
+  const anchor =
+    anchorQuote && anchorRevision != null && !Number.isNaN(anchorRevision)
+      ? {
+          quote: anchorQuote,
+          revision: anchorRevision,
+          lineStart:
+            anchorLineStart != null && !Number.isNaN(anchorLineStart)
+              ? anchorLineStart
+              : 1,
+          lineEnd:
+            anchorLineEnd != null && !Number.isNaN(anchorLineEnd)
+              ? anchorLineEnd
+              : 1,
+        }
+      : undefined
+
   const principal = await getPrincipal()
-  const result = await addComment(principal, docId, body.trim())
+  const result = await addComment(principal, docId, body.trim(), anchor)
 
   if (result.kind === "ok") {
     revalidatePath(`/d/${docId}`)
