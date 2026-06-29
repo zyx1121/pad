@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import "@/app/globals.css"
+import "@workspace/ui/globals.css"
 
 export const metadata: Metadata = {
   title: { default: "Pad", template: "%s | Pad" },

@@ -1,6 +1,6 @@
-import * as React from "react"
+import * as React from "react";
 
-import { cn } from "@workspace/ui/lib/utils"
+import { cn } from "@workspace/ui/lib/utils";
 
 export function Input({
   className,
@@ -23,5 +23,5 @@ export function Input({
       )}
       {...props}
     />
-  )
+  );
 }

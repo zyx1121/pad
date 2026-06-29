@@ -18,6 +18,8 @@
     "ui": "@workspace/ui/components"
   },
   "rtl": false,
+  "menuColor": "default",
+  "menuAccent": "subtle",
   "registries": {
     "@zyx1121": "https://ui.zyx.tw/r/{name}.json"
   }

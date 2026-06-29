@@ -1,11 +1,11 @@
-/* Pad design system — radix-luma tokens ported from ui.zyx.tw.
-   This file contains ONLY design tokens and base styles.
-   The consuming app is responsible for @import "tailwindcss" before this.
-   Mapbox and other www-specific rules have been stripped. */
-
+@import "tailwindcss";
 @import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+@source "../../../apps/**/*.{ts,tsx}";
+@source "../../../components/**/*.{ts,tsx}";
+@source "../**/*.{ts,tsx}";
 
 @theme inline {
   /* Fonts — mono-first */

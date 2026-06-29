@@ -1,18 +1,18 @@
-import * as React from "react"
+import * as React from "react";
 
-import { cn } from "@workspace/ui/lib/utils"
+import { cn } from "@workspace/ui/lib/utils";
 
-type Variant = "default" | "secondary" | "outline" | "destructive"
+type Variant = "default" | "secondary" | "outline" | "destructive";
 
 const variants: Record<Variant, string> = {
   default: "bg-foreground text-background",
   secondary: "bg-block text-foreground/80",
   outline: "border border-foreground/20 text-foreground",
   destructive: "bg-destructive text-white",
-}
+};
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: Variant
+  variant?: Variant;
 }
 
 export function Badge({
@@ -29,5 +29,5 @@ export function Badge({
       )}
       {...props}
     />
-  )
+  );
 }

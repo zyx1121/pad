@@ -1,28 +1,28 @@
-import * as React from "react"
-import { Loader2 } from "lucide-react"
+import * as React from "react";
+import { Loader2 } from "lucide-react";
 
-import { cn } from "@workspace/ui/lib/utils"
+import { cn } from "@workspace/ui/lib/utils";
 
-type Variant = "default" | "outline" | "ghost" | "raw"
-type Size = "default" | "sm" | "lg"
+type Variant = "default" | "outline" | "ghost" | "raw";
+type Size = "default" | "sm" | "lg";
 
 const variants: Record<Variant, string> = {
   default: "bg-foreground text-background hover:bg-foreground/90",
   outline: "border border-foreground/20 hover:bg-foreground/5",
   ghost: "hover:bg-foreground/5",
   raw: "h-auto bg-transparent px-0 py-0 text-foreground/60 hover:bg-transparent hover:text-foreground",
-}
+};
 
 const sizes: Record<Size, string> = {
   default: "h-9 px-4",
   sm: "h-8 px-3 text-xs",
   lg: "h-10 px-6",
-}
+};
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: Variant
-  size?: Size
-  loading?: boolean
+  variant?: Variant;
+  size?: Size;
+  loading?: boolean;
 }
 
 export function Button({
@@ -51,5 +51,5 @@ export function Button({
       ) : null}
       <span className={loading ? "opacity-70" : undefined}>{children}</span>
     </button>
-  )
+  );
 }

@@ -1,6 +1,6 @@
-import * as React from "react"
+import * as React from "react";
 
-import { cn } from "@workspace/ui/lib/utils"
+import { cn } from "@workspace/ui/lib/utils";
 
 export function Textarea({
   className,
@@ -20,5 +20,5 @@ export function Textarea({
       )}
       {...props}
     />
-  )
+  );
 }
