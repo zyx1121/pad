@@ -1,36 +1,12 @@
-FROM oven/bun:1.3.13-alpine AS base
+# Monorepo build: copy full source and install in-place. bun keeps per-package bins
+# inside each workspace's node_modules, so a cross-stage `COPY node_modules` loses
+# them; installing here keeps the workspace graph + binaries intact. The server runs
+# TypeScript directly via bun and applies migrations/ on startup.
+FROM oven/bun:1.3.13-alpine
 WORKDIR /app
 
-# --- deps stage: install workspace dependencies ------------------------------
-FROM base AS deps
-# Copy workspace manifests needed to resolve the monorepo graph
-COPY package.json bun.lock* ./
-COPY packages/domain/package.json ./packages/domain/package.json
-COPY packages/typescript-config/package.json ./packages/typescript-config/package.json
-COPY packages/eslint-config/package.json ./packages/eslint-config/package.json
-COPY apps/mcp/package.json ./apps/mcp/package.json
-# frozen-lockfile needs the FULL workspace graph, even members this image won't run
-COPY packages/ui/package.json ./packages/ui/package.json
-COPY apps/web/package.json ./apps/web/package.json
-RUN bun install --frozen-lockfile --production
-
-# --- runner stage: copy sources and start ------------------------------------
-FROM base AS runner
-WORKDIR /app
-
-# Workspace config
-COPY --from=deps /app/node_modules ./node_modules
-COPY package.json tsconfig.json ./
-
-# Packages
-COPY packages/domain ./packages/domain
-COPY packages/typescript-config ./packages/typescript-config
-
-# App
-COPY apps/mcp ./apps/mcp
-
-# Migrations produced by drizzle-kit generate (committed to repo)
-COPY migrations ./migrations
+COPY . .
+RUN bun install --frozen-lockfile
 
 ENV PORT=8080
 ENV MCP_PATH=/mcp

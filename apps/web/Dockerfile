@@ -1,33 +1,13 @@
-FROM oven/bun:1.3.13-alpine AS base
+# Monorepo build: copy full source, install in-place (bun puts per-package bins in
+# each workspace's node_modules — a cross-stage `COPY node_modules` drops them), then
+# build the standalone output. .dockerignore keeps node_modules/.next/.git out.
+FROM oven/bun:1.3.13-alpine AS builder
 WORKDIR /app
 
-# --- deps stage: install workspace dependencies ------------------------------
-FROM base AS deps
-COPY package.json bun.lock* ./
-COPY packages/domain/package.json ./packages/domain/package.json
-COPY packages/ui/package.json ./packages/ui/package.json
-COPY packages/typescript-config/package.json ./packages/typescript-config/package.json
-COPY packages/eslint-config/package.json ./packages/eslint-config/package.json
-COPY apps/web/package.json ./apps/web/package.json
-# frozen-lockfile needs the FULL workspace graph, even members this image won't run
-COPY apps/mcp/package.json ./apps/mcp/package.json
+COPY . .
 RUN bun install --frozen-lockfile
 
-# --- builder stage: Next.js build (standalone output) ------------------------
-FROM base AS builder
-WORKDIR /app
-
-COPY --from=deps /app/node_modules ./node_modules
-COPY package.json ./
-COPY packages/domain ./packages/domain
-COPY packages/ui ./packages/ui
-COPY packages/typescript-config ./packages/typescript-config
-COPY packages/eslint-config ./packages/eslint-config
-COPY apps/web ./apps/web
-
 ENV NEXT_TELEMETRY_DISABLED=1
-
-# run from root via workspace filter so bun resolves hoisted bins (next, etc.)
 RUN bun run --filter=pad-web build
 
 # --- runner stage: minimal runtime image -------------------------------------
