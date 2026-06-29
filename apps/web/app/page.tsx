@@ -8,7 +8,7 @@ import { listDocsFor } from "@workspace/domain/ops"
 import { SignOutButton } from "@/components/sign-out-button"
 import { Badge } from "@workspace/ui/components/ui/badge"
 import { headers } from "next/headers"
-import { auth } from "@/lib/auth"
+import { getAuth } from "@/lib/auth"
 
 const visibilityIcon = {
   private: Lock,
@@ -19,7 +19,7 @@ const visibilityIcon = {
 export default async function HomePage() {
   const principal = await getPrincipal()
 
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getAuth().api.getSession({ headers: await headers() })
   const userEmail = session?.user?.email ?? null
   const ownerMode = isOwnerEmail(userEmail)
 

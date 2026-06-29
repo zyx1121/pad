@@ -11,7 +11,7 @@ import { CommentList } from "@/components/comment-list"
 import { CommentForm } from "@/components/comment-form"
 import { ShareControls } from "@/components/share-controls"
 import { headers } from "next/headers"
-import { auth } from "@/lib/auth"
+import { getAuth } from "@/lib/auth"
 import type { Principal } from "@workspace/domain/authz"
 import { canComment } from "@workspace/domain/authz"
 
@@ -32,7 +32,7 @@ export default async function DocPage({ params }: Props) {
   const commentList =
     commentsResult.kind === "ok" ? commentsResult.comments : []
 
-  const session = await auth.api.getSession({ headers: await headers() })
+  const session = await getAuth().api.getSession({ headers: await headers() })
   const userEmail = session?.user?.email ?? null
   const ownerMode = isOwnerEmail(userEmail)
 

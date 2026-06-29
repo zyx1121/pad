@@ -3,11 +3,11 @@
 // then pass the principal to domain ops — never inline authz here.
 
 import { headers } from "next/headers"
-import { auth } from "@/lib/auth"
+import { getAuth } from "@/lib/auth"
 import type { Principal } from "@workspace/domain/authz"
 
 export async function getPrincipal(): Promise<Principal> {
-  const session = await auth.api.getSession({
+  const session = await getAuth().api.getSession({
     headers: await headers(),
   })
 

@@ -49,14 +49,15 @@ function makeAuth() {
   })
 }
 
-// Lazy singleton — created on first access, never at module evaluation time.
+// Lazy singleton — built on first call, never at module evaluation time, so build /
+// CLI imports don't hit getDb() without DATABASE_URL. Returns the REAL betterAuth
+// instance (not a Proxy): toNextJsHandler relies on `"handler" in auth` detection and
+// `this` binding, both of which a Proxy over an empty target silently breaks.
 let _auth: ReturnType<typeof makeAuth> | null = null
 
-export const auth = new Proxy({} as ReturnType<typeof makeAuth>, {
-  get(_target, prop) {
-    if (!_auth) _auth = makeAuth()
-    return _auth[prop as keyof ReturnType<typeof makeAuth>]
-  },
-})
+export function getAuth(): ReturnType<typeof makeAuth> {
+  if (!_auth) _auth = makeAuth()
+  return _auth
+}
 
 export type Session = ReturnType<typeof makeAuth>["$Infer"]["Session"]

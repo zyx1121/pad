@@ -5,7 +5,7 @@
 // [THREAT-S-1] Open-redirect prevention: `next` param validated before redirect.
 
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/lib/auth"
+import { getAuth } from "@/lib/auth"
 
 export const config = {
   matcher: ["/owner/:path*"],
@@ -19,7 +19,7 @@ function safeRedirectParam(raw: string | null): string {
 }
 
 export async function proxy(request: NextRequest) {
-  const session = await auth.api.getSession({
+  const session = await getAuth().api.getSession({
     headers: request.headers,
   })
 
