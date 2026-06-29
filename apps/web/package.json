@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
-    "tailwindcss": "^4.1.18",
+    "@tailwindcss/typography": "^0.5.20",
     "@types/node": "^25.1.0",
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
@@ -34,6 +34,7 @@
     "@workspace/typescript-config": "workspace:*",
     "drizzle-orm": "^0.45.2",
     "eslint": "^9.39.2",
+    "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3"
   }
 }

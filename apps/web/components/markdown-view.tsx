@@ -12,7 +12,7 @@ interface Props {
 
 export function MarkdownView({ content }: Props) {
   return (
-    <div className="prose prose-neutral dark:prose-invert max-w-none">
+    <div className="prose prose-lg prose-neutral dark:prose-invert mx-auto">
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
     </div>
   )
